@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empire Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👑 Empire</h1>
+            <p class="subtitle">The Famous Person Guessing Game</p>
+        </header>
+
+        <main>
+            <!-- Home Screen -->
+            <section id="homeScreen" class="screen active">
+                <div class="card">
+                    <h2>How to Play</h2>
+                    <ol class="instructions">
+                        <li>Create a new game or join with a PIN</li>
+                        <li>Everyone enters a famous person's name (keep it secret!)</li>
+                        <li>The reader reads all names aloud</li>
+                        <li>Take turns guessing who submitted which name</li>
+                        <li>Correct guess? That player joins your empire!</li>
+                        <li>Last player standing wins!</li>
+                    </ol>
+                </div>
+
+                <div class="card">
+                    <h2>Join a Game</h2>
+                    <div class="form-group">
+                        <label for="gamePin">Game PIN</label>
+                        <input type="text" id="gamePin" placeholder="Enter 6-letter PIN" maxlength="6" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="playerName">Your Name</label>
+                        <input type="text" id="playerName" placeholder="Enter your name" maxlength="20" autocomplete="off">
+                    </div>
+                    <button id="joinGameBtn" class="btn btn-primary">Join Game</button>
+                </div>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="card">
+                    <h2>Host a Game</h2>
+                    <p>Create a new game and share the PIN with friends</p>
+                    <button id="createGameBtn" class="btn btn-secondary">Create New Game</button>
+                </div>
+            </section>
+
+            <!-- Game Created Screen (for host) -->
+            <section id="gameCreatedScreen" class="screen">
+                <div class="card highlight">
+                    <h2>Game Created! 🎉</h2>
+                    <p>Share this PIN with your friends:</p>
+                    <div class="pin-display" id="displayPin">------</div>
+                    <button id="copyPinBtn" class="btn btn-small">📋 Copy PIN</button>
+                    <div class="share-links">
+                        <p>Or share the player link:</p>
+                        <input type="text" id="shareLink" readonly class="share-input">
+                        <button id="copyLinkBtn" class="btn btn-small">📋 Copy Link</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Reader Dashboard</h2>
+                    <p>Open the reader view to manage the game:</p>
+                    <button id="openReaderBtn" class="btn btn-primary">Open Reader View</button>
+                </div>
+            </section>
+
+            <!-- Waiting Room -->
+            <section id="waitingRoom" class="screen">
+                <div class="card">
+                    <div class="game-info">
+                        <span class="label">Game PIN:</span>
+                        <span class="pin-small" id="waitingRoomPin">------</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Submit Your Famous Person</h2>
+                    <p>Think of a famous person and enter their name below. Keep it secret!</p>
+                    <div class="form-group">
+                        <label for="famousName">Famous Person's Name</label>
+                        <input type="text" id="famousName" placeholder="e.g., Albert Einstein" maxlength="50" autocomplete="off">
+                    </div>
+                    <button id="submitNameBtn" class="btn btn-primary">Submit Name</button>
+                    <div id="submissionStatus" class="status-message"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Players (<span id="playerCount">0</span>)</h2>
+                    <ul id="playerList" class="player-list"></ul>
+                </div>
+
+                <div id="waitingMessage" class="waiting-message">
+                    <div class="spinner"></div>
+                    <p>Waiting for all players to submit their names...</p>
+                </div>
+            </section>
+
+            <!-- Game Active Screen -->
+            <section id="gameActiveScreen" class="screen">
+                <div class="card highlight">
+                    <h2>🎮 Game in Progress!</h2>
+                    <p>Listen to the reader and wait for your turn to guess.</p>
+                </div>
+
+                <div class="card">
+                    <h3>Current Guesser</h3>
+                    <div class="current-guesser" id="currentGuesserDisplay">-</div>
+                </div>
+
+                <div class="card">
+                    <h3>Revealed Names</h3>
+                    <ul id="revealedList" class="revealed-list">
+                        <li class="empty-state">No names revealed yet</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Eliminated Players</h3>
+                    <ul id="eliminatedList" class="eliminated-list">
+                        <li class="empty-state">No one eliminated yet</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Game Over Screen -->
+            <section id="gameOverScreen" class="screen">
+                <div class="card highlight winner-card">
+                    <h2>🏆 Game Over!</h2>
+                    <p>The winner is:</p>
+                    <div class="winner-name" id="winnerName">-</div>
+                    <p>Congratulations on building the largest empire!</p>
+                </div>
+
+                <div class="card">
+                    <button id="playAgainBtn" class="btn btn-primary">Play Again</button>
+                    <button id="newGameBtn" class="btn btn-secondary">New Game</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Empire Game &copy; 2024 | Made for fun with friends</p>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="game-client.js"></script>
+</body>
+</html>

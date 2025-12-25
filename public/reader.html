@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empire - Reader View</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container reader-view">
+        <header>
+            <h1>👑 Empire</h1>
+            <p class="subtitle">Reader Dashboard</p>
+        </header>
+
+        <main>
+            <!-- Waiting for Players -->
+            <section id="waitingSection" class="screen active">
+                <div class="card highlight">
+                    <div class="game-info large">
+                        <span class="label">Game PIN:</span>
+                        <span class="pin-display" id="readerPin">------</span>
+                    </div>
+                    <p>Share this PIN with players to join!</p>
+                </div>
+
+                <div class="card">
+                    <h2>Players (<span id="playerCount">0</span>)</h2>
+                    <ul id="playerList" class="player-list reader-list"></ul>
+                    <p id="noPlayersMsg" class="empty-state">Waiting for players to join...</p>
+                </div>
+
+                <div class="card">
+                    <h2>Ready to Start?</h2>
+                    <p id="startInfo">Need at least 2 players with submissions to start.</p>
+                    <button id="startGameBtn" class="btn btn-primary btn-large" disabled>Start Game</button>
+                </div>
+            </section>
+
+            <!-- Game In Progress -->
+            <section id="gameSection" class="screen">
+                <div class="card reader-names-card">
+                    <h2>📜 Famous Names to Read</h2>
+                    <p class="instruction">Read these names aloud to all players (in any order):</p>
+                    <ol id="namesList" class="names-list"></ol>
+                </div>
+
+                <div class="card">
+                    <h3>Current Guesser</h3>
+                    <div class="current-guesser large" id="currentGuesserDisplay">-</div>
+                    <button id="nextGuesserBtn" class="btn btn-secondary">Next Guesser →</button>
+                </div>
+
+                <div class="card">
+                    <h3>Mark a Correct Guess</h3>
+                    <p>When someone guesses correctly, select the name and who guessed it:</p>
+                    <div class="form-group">
+                        <label for="revealNameSelect">Famous Name:</label>
+                        <select id="revealNameSelect" class="select-input">
+                            <option value="">Select a name...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="guessedBySelect">Guessed by:</label>
+                        <select id="guessedBySelect" class="select-input">
+                            <option value="">Select player...</option>
+                        </select>
+                    </div>
+                    <button id="revealNameBtn" class="btn btn-primary">Confirm Correct Guess</button>
+                </div>
+
+                <div class="card">
+                    <h3>Eliminate Player</h3>
+                    <p>When a player's identity is guessed, eliminate them:</p>
+                    <div class="form-group">
+                        <label for="eliminateSelect">Player to eliminate:</label>
+                        <select id="eliminateSelect" class="select-input">
+                            <option value="">Select player...</option>
+                        </select>
+                    </div>
+                    <button id="eliminateBtn" class="btn btn-danger">Eliminate Player</button>
+                </div>
+
+                <div class="card">
+                    <h3>Revealed Names</h3>
+                    <ul id="revealedList" class="revealed-list">
+                        <li class="empty-state">No names revealed yet</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Eliminated Players</h3>
+                    <ul id="eliminatedList" class="eliminated-list">
+                        <li class="empty-state">No one eliminated yet</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Active Players</h3>
+                    <ul id="activePlayersList" class="player-list">
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Game Over -->
+            <section id="gameOverSection" class="screen">
+                <div class="card highlight winner-card">
+                    <h2>🏆 Game Over!</h2>
+                    <p>The winner is:</p>
+                    <div class="winner-name" id="winnerName">-</div>
+                </div>
+
+                <div class="card">
+                    <button id="resetGameBtn" class="btn btn-primary btn-large">Play Again (Same Players)</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Empire Game &copy; 2024 | Reader View</p>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="reader-client.js"></script>
+</body>
+</html>
