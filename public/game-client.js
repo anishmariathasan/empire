@@ -171,12 +171,6 @@ submitNameBtn.addEventListener('click', () => {
         return;
     }
 
-    // Show preview of normalized name
-    const normalizedPreview = toTitleCase(famousName);
-    if (!confirm(`Submit this name?\\n\\n"${normalizedPreview}"\\n\\nMake sure the spelling is correct!`)) {
-        return;
-    }
-
     socket.emit('submitName', { famousName }, (response) => {
         if (response.success) {
             hasSubmitted = true;

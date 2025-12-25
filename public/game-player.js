@@ -130,12 +130,6 @@ submitNameBtn.addEventListener('click', () => {
         return;
     }
 
-    // Show preview of normalized name
-    const normalizedPreview = toTitleCase(famousName);
-    if (!confirm(`Submit this name?\\n\\n"${normalizedPreview}"\\n\\nMake sure the spelling is correct!`)) {
-        return;
-    }
-
     socket.emit('submitName', { famousName }, (response) => {
         if (response.success) {
             hasSubmitted = true;
@@ -155,6 +149,23 @@ famousNameInput.addEventListener('keypress', (e) => {
         submitNameBtn.click();
     }
 });
+
+// Add another player button
+const addAnotherPlayerBtn = document.getElementById('addAnotherPlayerBtn');
+if (addAnotherPlayerBtn) {
+    addAnotherPlayerBtn.addEventListener('click', () => {
+        // Reset form for next player
+        playerName = null;
+        hasSubmitted = false;
+        famousNameInput.value = '';
+        famousNameInput.disabled = false;
+        submitNameBtn.disabled = false;
+        playerNameInput.value = '';
+        
+        // Go back to join screen
+        showScreen('join');
+    });
+}
 
 playAgainBtn.addEventListener('click', () => {
     // Reset state
