@@ -39,6 +39,7 @@ const playAgainBtn = document.getElementById('playAgainBtn');
 
 // State
 let playerName = null;
+let playerId = null;
 let hasSubmitted = false;
 
 // Initialize
@@ -108,6 +109,7 @@ joinBtn.addEventListener('click', () => {
     socket.emit('joinGame', { pin: gamePin, playerName: name }, (response) => {
         if (response.success) {
             playerName = response.normalizedName || name;
+            playerId = response.playerId;
             showScreen('waitingRoom');
             showToast(`Welcome, ${playerName}!`, 'success');
         } else {
@@ -130,12 +132,12 @@ submitNameBtn.addEventListener('click', () => {
         return;
     }
 
-    socket.emit('submitName', { famousName }, (response) => {
+    socket.emit('submitName', { famousName, playerId }, (response) => {
         if (response.success) {
             hasSubmitted = true;
             submissionCard.style.display = 'none';
             submittedCard.style.display = 'block';
-            // Update submitted card to show the normalized name and add another player option
+            // Update submitted card to show the normalised name and add another player option
             submittedCard.innerHTML = `
                 <div class="success-icon">✓</div>
                 <h2>Name Submitted!</h2>
@@ -161,12 +163,12 @@ submitNameBtn.addEventListener('click', () => {
 
 // Reset for another player on same device
 function resetForAnotherPlayer() {
-    // Disconnect current socket and reconnect
-    socket.disconnect();
-    socket.connect();
+    // Don't disconnect - just reset state for a new player
+    // The previous player's submission remains in the game
     
-    // Reset state
+    // Reset local state
     playerName = null;
+    playerId = null;
     hasSubmitted = false;
     
     // Reset UI

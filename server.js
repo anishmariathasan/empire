@@ -108,7 +108,7 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Normalize player name
+        // Normalise player name
         const normalizedPlayerName = normalizeName(playerName);
 
         // Check for duplicate names
@@ -119,14 +119,19 @@ io.on('connection', (socket) => {
             }
         }
 
-        game.players.set(socket.id, {
-            id: socket.id,
+        // Generate unique player ID (allows multiple players from same socket/device)
+        const uniquePlayerId = `${socket.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        game.players.set(uniquePlayerId, {
+            id: uniquePlayerId,
+            socketId: socket.id,
             name: normalizedPlayerName,
             hasSubmitted: false
         });
 
         socket.join(pin.toUpperCase());
         socket.gamePin = pin.toUpperCase();
+        socket.currentPlayerId = uniquePlayerId;
 
         // Notify all players about the updated player list
         const playerList = Array.from(game.players.values()).map(p => ({
@@ -137,11 +142,11 @@ io.on('connection', (socket) => {
         io.to(pin.toUpperCase()).emit('playerListUpdate', playerList);
 
         console.log(`${normalizedPlayerName} joined game ${pin}`);
-        callback({ success: true, isHost: socket.id === game.hostId, normalizedName: normalizedPlayerName });
+        callback({ success: true, isHost: socket.id === game.hostId, normalizedName: normalizedPlayerName, playerId: uniquePlayerId });
     });
 
     // Submit a famous person name
-    socket.on('submitName', ({ famousName }, callback) => {
+    socket.on('submitName', ({ famousName, playerId }, callback) => {
         const pin = socket.gamePin;
         const game = games.get(pin);
 
@@ -155,16 +160,24 @@ io.on('connection', (socket) => {
             return;
         }
 
-        const player = game.players.get(socket.id);
+        // Use provided playerId or fall back to currentPlayerId on socket
+        const currentPlayerId = playerId || socket.currentPlayerId;
+        const player = game.players.get(currentPlayerId);
+        
         if (!player) {
-            callback({ success: false, error: 'You are not in this game.' });
+            callback({ success: false, error: 'You are not in this game. Please join first.' });
             return;
         }
 
-        // Normalize famous name to Title Case
+        if (player.hasSubmitted) {
+            callback({ success: false, error: 'You have already submitted a name.' });
+            return;
+        }
+
+        // Normalise famous name to Title Case
         const normalizedFamousName = normalizeName(famousName);
 
-        game.submissions.set(socket.id, normalizedFamousName);
+        game.submissions.set(currentPlayerId, normalizedFamousName);
         player.hasSubmitted = true;
 
         // Update player list
@@ -356,26 +369,32 @@ io.on('connection', (socket) => {
         if (pin && games.has(pin)) {
             const game = games.get(pin);
             
-            if (game.players.has(socket.id)) {
-                const player = game.players.get(socket.id);
-                console.log(`${player.name} disconnected from game ${pin}`);
-                
-                // Don't remove player during active game, just mark as disconnected
-                if (game.status === 'waiting') {
-                    game.players.delete(socket.id);
-                    game.submissions.delete(socket.id);
-
-                    const playerList = Array.from(game.players.values()).map(p => ({
-                        name: p.name,
-                        hasSubmitted: p.hasSubmitted
-                    }));
-
-                    io.to(pin).emit('playerListUpdate', playerList);
+            // Find all players from this socket that haven't submitted
+            const playersToRemove = [];
+            for (const [playerId, player] of game.players) {
+                if (player.socketId === socket.id && !player.hasSubmitted && game.status === 'waiting') {
+                    playersToRemove.push(playerId);
                 }
             }
+            
+            // Remove unsubmitted players from this socket
+            for (const playerId of playersToRemove) {
+                const player = game.players.get(playerId);
+                console.log(`${player.name} disconnected from game ${pin} (not submitted)`);
+                game.players.delete(playerId);
+                game.submissions.delete(playerId);
+            }
+            
+            if (playersToRemove.length > 0) {
+                const playerList = Array.from(game.players.values()).map(p => ({
+                    name: p.name,
+                    hasSubmitted: p.hasSubmitted
+                }));
+                io.to(pin).emit('playerListUpdate', playerList);
+            }
 
-            // Clean up empty games
-            if (game.players.size === 0 && !socket.isReader) {
+            // Clean up empty games only if no players at all
+            if (game.players.size === 0 && game.submissions.size === 0) {
                 games.delete(pin);
                 console.log(`Game ${pin} deleted (no players)`);
             }

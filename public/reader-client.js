@@ -213,8 +213,8 @@ readerJoinBtn.addEventListener('click', () => {
     // First join the game
     socket.emit('joinGame', { pin: gamePin, playerName: name }, (response) => {
         if (response.success) {
-            // Then submit the famous name
-            socket.emit('submitName', { famousName }, (submitResponse) => {
+            // Then submit the famous name with playerId
+            socket.emit('submitName', { famousName, playerId: response.playerId }, (submitResponse) => {
                 if (submitResponse.success) {
                     readerHasJoined = true;
                     readerJoinCard.innerHTML = `
