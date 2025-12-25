@@ -83,7 +83,8 @@ io.on('connection', (socket) => {
             revealedNames: [],
             eliminatedPlayers: new Set(),
             currentGuesser: null,
-            guessOrder: []
+            guessOrder: [],
+            createdAt: Date.now()
         };
 
         games.set(pin, game);
@@ -206,6 +207,7 @@ io.on('connection', (socket) => {
         socket.isReader = true;
 
         const playerList = Array.from(game.players.values()).map(p => ({
+            id: p.id,
             name: p.name,
             hasSubmitted: p.hasSubmitted
         }));
@@ -217,6 +219,60 @@ io.on('connection', (socket) => {
             submissionCount: game.submissions.size,
             playerList: playerList
         });
+    });
+
+    // Remove a player (reader only, before game starts)
+    socket.on('removePlayer', ({ playerId, playerName }, callback) => {
+        const pin = socket.gamePin;
+        const game = games.get(pin);
+
+        if (!game) {
+            callback({ success: false, error: 'Game not found.' });
+            return;
+        }
+
+        if (!socket.isReader) {
+            callback({ success: false, error: 'Only the reader can remove players.' });
+            return;
+        }
+
+        if (game.status !== 'waiting') {
+            callback({ success: false, error: 'Cannot remove players after game has started.' });
+            return;
+        }
+
+        // Find player by ID or name
+        let playerIdToRemove = playerId;
+        if (!playerIdToRemove && playerName) {
+            for (const [id, player] of game.players) {
+                if (player.name === playerName) {
+                    playerIdToRemove = id;
+                    break;
+                }
+            }
+        }
+
+        if (!playerIdToRemove || !game.players.has(playerIdToRemove)) {
+            callback({ success: false, error: 'Player not found.' });
+            return;
+        }
+
+        const removedPlayer = game.players.get(playerIdToRemove);
+        game.players.delete(playerIdToRemove);
+        game.submissions.delete(playerIdToRemove);
+
+        // Notify all players
+        const playerList = Array.from(game.players.values()).map(p => ({
+            id: p.id,
+            name: p.name,
+            hasSubmitted: p.hasSubmitted
+        }));
+
+        io.to(pin).emit('playerListUpdate', playerList);
+        io.to(pin).emit('playerRemoved', { playerName: removedPlayer.name });
+
+        console.log(`${removedPlayer.name} removed from game ${pin} by reader`);
+        callback({ success: true, removedName: removedPlayer.name });
     });
 
     // Start the game (reader only)
@@ -393,10 +449,12 @@ io.on('connection', (socket) => {
                 io.to(pin).emit('playerListUpdate', playerList);
             }
 
-            // Clean up empty games only if no players at all
-            if (game.players.size === 0 && game.submissions.size === 0) {
+            // Only delete games that are empty AND older than 30 minutes
+            // This prevents games from being deleted when host switches tabs
+            const gameAgeMinutes = (Date.now() - game.createdAt) / (1000 * 60);
+            if (game.players.size === 0 && game.submissions.size === 0 && gameAgeMinutes > 30) {
                 games.delete(pin);
-                console.log(`Game ${pin} deleted (no players)`);
+                console.log(`Game ${pin} deleted (no players, older than 30 mins)`);
             }
         }
         console.log('User disconnected:', socket.id);

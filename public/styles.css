@@ -297,8 +297,38 @@ input[type="text"]::placeholder {
     margin-bottom: 8px;
 }
 
+.player-list li .player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
 .player-list li .player-name {
     font-weight: 500;
+}
+
+.player-list li .btn-remove {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: rgba(231, 76, 60, 0.15);
+    color: var(--error-color);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+
+.player-list li .btn-remove:hover {
+    background: var(--error-color);
+    color: white;
 }
 
 .player-list li .status {

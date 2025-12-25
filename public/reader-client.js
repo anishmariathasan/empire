@@ -100,12 +100,26 @@ function updatePlayerList(playerData) {
     players.forEach(player => {
         const li = document.createElement('li');
         li.innerHTML = `
-            <span class="player-name">${escapeHtml(player.name)}</span>
-            <span class="status ${player.hasSubmitted ? 'submitted' : 'waiting'}">
-                ${player.hasSubmitted ? '✓ Submitted' : 'Waiting for submission...'}
-            </span>
+            <div class="player-info">
+                <span class="player-name">${escapeHtml(player.name)}</span>
+                <span class="status ${player.hasSubmitted ? 'submitted' : 'waiting'}">
+                    ${player.hasSubmitted ? '✓ Submitted' : 'Waiting for submission...'}
+                </span>
+            </div>
+            <button class="btn-remove" data-player-id="${player.id || ''}" data-player-name="${escapeHtml(player.name)}" title="Remove player">✕</button>
         `;
         playerList.appendChild(li);
+    });
+
+    // Add click handlers for remove buttons
+    playerList.querySelectorAll('.btn-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const playerName = e.target.dataset.playerName;
+            const playerId = e.target.dataset.playerId;
+            if (confirm(`Remove ${playerName} from the game?`)) {
+                removePlayer(playerId, playerName);
+            }
+        });
     });
 
     // Check if we can start the game
@@ -125,8 +139,20 @@ function updatePlayerList(playerData) {
     }
 }
 
+// Remove player function
+function removePlayer(playerId, playerName) {
+    socket.emit('removePlayer', { playerId, playerName }, (response) => {
+        if (response.success) {
+            showToast(`${response.removedName} removed from game`, 'success');
+        } else {
+            showToast(response.error || 'Failed to remove player', 'error');
+        }
+    });
+}
+
 function updateNamesList() {
     namesList.innerHTML = '';
+    shuffledNames.forEach((name, index) => {
     shuffledNames.forEach((name, index) => {
         const li = document.createElement('li');
         li.textContent = name;
@@ -363,6 +389,10 @@ resetGameBtn.addEventListener('click', () => {
 // Socket event handlers
 socket.on('playerListUpdate', (playerData) => {
     updatePlayerList(playerData);
+});
+
+socket.on('playerRemoved', ({ playerName, removedBy }) => {
+    showToast(`${playerName} has been removed from the game`, 'info');
 });
 
 socket.on('gameOver', ({ winner }) => {
