@@ -153,7 +153,6 @@ function removePlayer(playerId, playerName) {
 function updateNamesList() {
     namesList.innerHTML = '';
     shuffledNames.forEach((name, index) => {
-    shuffledNames.forEach((name, index) => {
         const li = document.createElement('li');
         li.textContent = name;
         li.dataset.name = name;
