@@ -262,15 +262,20 @@ socket.on('gameReset', ({ playerList: players }) => {
     showToast('New round started!', 'success');
 });
 
-socket.on('playerRemoved', ({ playerId, playerName }) => {
+socket.on('playerRemoved', ({ playerId: removedPlayerId, playerName: removedPlayerName }) => {
     // Check if the current player was removed
-    if (currentPlayerId && playerId === currentPlayerId) {
+    if (playerId && removedPlayerId === playerId) {
         alert('You have been removed from the game by the reader.');
         window.location.href = '/';
     } else {
-        showToast(`${playerName} has been removed from the game`, 'info');
+        showToast(`${removedPlayerName} has been removed from the game`, 'info');
     }
 });
 
+socket.on('disconnect', () => {
+    showToast('Disconnected from server', 'error');
+});
+
+socket.on('connect', () => {
     console.log('Connected to server');
 });
