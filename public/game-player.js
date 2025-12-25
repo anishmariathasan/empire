@@ -4,6 +4,7 @@ const socket = io();
 // Get PIN from URL
 const pathParts = window.location.pathname.split('/');
 const gamePin = pathParts[pathParts.length - 1].toUpperCase();
+console.log('Game PIN from URL:', gamePin, 'Path:', window.location.pathname);
 
 // DOM Elements
 const screens = {

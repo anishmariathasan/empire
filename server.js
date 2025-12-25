@@ -77,7 +77,7 @@ io.on('connection', (socket) => {
             pin: pin,
             hostId: socket.id,
             players: new Map(),
-            status: 'waiting', // waiting, playing, revealing
+            status: 'waiting',
             submissions: new Map(),
             shuffledNames: [],
             revealedNames: [],
@@ -97,10 +97,14 @@ io.on('connection', (socket) => {
 
     // Join an existing game
     socket.on('joinGame', ({ pin, playerName }, callback) => {
+        console.log(`Join attempt - PIN: ${pin}, Player: ${playerName}`);
+        console.log(`Available games: ${Array.from(games.keys()).join(', ') || 'none'}`);
+        
         const game = games.get(pin.toUpperCase());
 
         if (!game) {
-            callback({ success: false, error: 'Game not found. Please check the PIN.' });
+            console.log(`Game not found for PIN: ${pin.toUpperCase()}`);
+            callback({ success: false, error: 'Game not found. The game may have expired or the PIN is incorrect.' });
             return;
         }
 
@@ -452,6 +456,7 @@ io.on('connection', (socket) => {
             // Only delete games that are empty AND older than 30 minutes
             // This prevents games from being deleted when host switches tabs
             const gameAgeMinutes = (Date.now() - game.createdAt) / (1000 * 60);
+            console.log(`Game ${pin} - players: ${game.players.size}, submissions: ${game.submissions.size}, age: ${gameAgeMinutes.toFixed(2)} mins`);
             if (game.players.size === 0 && game.submissions.size === 0 && gameAgeMinutes > 30) {
                 games.delete(pin);
                 console.log(`Game ${pin} deleted (no players, older than 30 mins)`);
