@@ -20,6 +20,13 @@ const noPlayersMsg = document.getElementById('noPlayersMsg');
 const startInfo = document.getElementById('startInfo');
 const startGameBtn = document.getElementById('startGameBtn');
 
+// Reader join elements
+const readerJoinCard = document.getElementById('readerJoinCard');
+const readerNameInput = document.getElementById('readerName');
+const readerFamousNameInput = document.getElementById('readerFamousName');
+const readerJoinBtn = document.getElementById('readerJoinBtn');
+const readerJoinStatus = document.getElementById('readerJoinStatus');
+
 // Game section elements
 const namesList = document.getElementById('namesList');
 const currentGuesserDisplay = document.getElementById('currentGuesserDisplay');
@@ -44,6 +51,7 @@ let guessOrder = [];
 let currentGuesser = null;
 let revealedNames = new Set();
 let eliminatedPlayers = new Set();
+let readerHasJoined = false;
 
 // Initialize
 readerPin.textContent = gamePin;
@@ -61,6 +69,13 @@ function showToast(message, type = 'info') {
     setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
+}
+
+// Title case helper for preview
+function toTitleCase(str) {
+    return str.trim().toLowerCase().split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 }
 
 function escapeHtml(text) {
@@ -178,6 +193,51 @@ socket.emit('joinAsReader', { pin: gamePin }, (response) => {
     } else {
         showToast(response.error || 'Failed to join as reader', 'error');
     }
+});
+
+// Reader join as player
+readerJoinBtn.addEventListener('click', () => {
+    const name = readerNameInput.value.trim();
+    const famousName = readerFamousNameInput.value.trim();
+
+    if (!name) {
+        showToast('Please enter your name', 'error');
+        return;
+    }
+
+    if (!famousName) {
+        showToast('Please enter a famous person\'s name', 'error');
+        return;
+    }
+
+    // Show preview of normalized name
+    const normalizedPreview = toTitleCase(famousName);
+    if (!confirm(`Submit this famous person?\\n\\n"${normalizedPreview}"\\n\\nMake sure the spelling is correct!`)) {
+        return;
+    }
+
+    // First join the game
+    socket.emit('joinGame', { pin: gamePin, playerName: name }, (response) => {
+        if (response.success) {
+            // Then submit the famous name
+            socket.emit('submitName', { famousName }, (submitResponse) => {
+                if (submitResponse.success) {
+                    readerHasJoined = true;
+                    readerJoinCard.innerHTML = `
+                        <div class="success-icon">✓</div>
+                        <h2>You're In!</h2>
+                        <p>Playing as: <strong>${response.normalizedName}</strong></p>
+                        <p>Submitted: <strong>${submitResponse.normalizedName}</strong></p>
+                    `;
+                    showToast('You have joined the game!', 'success');
+                } else {
+                    showToast(submitResponse.error || 'Failed to submit name', 'error');
+                }
+            });
+        } else {
+            showToast(response.error || 'Failed to join game', 'error');
+        }
+    });
 });
 
 // Event Handlers

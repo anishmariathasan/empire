@@ -61,6 +61,13 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
+// Title case helper for preview
+function toTitleCase(str) {
+    return str.trim().toLowerCase().split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
 function updatePlayerList(players) {
     playerList.innerHTML = '';
     playerCountSpan.textContent = players.length;
@@ -122,6 +129,14 @@ openReaderBtn.addEventListener('click', () => {
     window.open(`/reader/${currentPin}`, '_blank');
 });
 
+// Back to home button
+const backToHomeBtn = document.getElementById('backToHomeBtn');
+backToHomeBtn.addEventListener('click', () => {
+    if (confirm('Are you sure you want to leave? The game PIN will be lost.')) {
+        window.location.href = '/';
+    }
+});
+
 joinGameBtn.addEventListener('click', () => {
     const pin = gamePinInput.value.trim().toUpperCase();
     const name = playerNameInput.value.trim();
@@ -156,12 +171,18 @@ submitNameBtn.addEventListener('click', () => {
         return;
     }
 
+    // Show preview of normalized name
+    const normalizedPreview = toTitleCase(famousName);
+    if (!confirm(`Submit this name?\\n\\n"${normalizedPreview}"\\n\\nMake sure the spelling is correct!`)) {
+        return;
+    }
+
     socket.emit('submitName', { famousName }, (response) => {
         if (response.success) {
             hasSubmitted = true;
             famousNameInput.disabled = true;
             submitNameBtn.disabled = true;
-            submissionStatus.textContent = '✓ Name submitted! Waiting for others...';
+            submissionStatus.textContent = `✓ Submitted: "${response.normalizedName}"`;
             submissionStatus.className = 'status-message success';
             showToast('Name submitted successfully!', 'success');
         } else {

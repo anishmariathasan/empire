@@ -16,12 +16,31 @@
         <main>
             <!-- Waiting for Players -->
             <section id="waitingSection" class="screen active">
+                <div class="back-nav">
+                    <a href="/" class="back-btn">← Back to Home</a>
+                </div>
+
                 <div class="card highlight">
                     <div class="game-info large">
                         <span class="label">Game PIN:</span>
                         <span class="pin-display" id="readerPin">------</span>
                     </div>
                     <p>Share this PIN with players to join!</p>
+                </div>
+
+                <div class="card" id="readerJoinCard">
+                    <h2>Join as a Player (Optional)</h2>
+                    <p>Want to play too? Enter your name to participate:</p>
+                    <div class="form-group">
+                        <label for="readerName">Your Name</label>
+                        <input type="text" id="readerName" placeholder="Enter your name" maxlength="20" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="readerFamousName">Famous Person's Name</label>
+                        <input type="text" id="readerFamousName" placeholder="e.g., Albert Einstein" maxlength="50" autocomplete="off">
+                    </div>
+                    <button id="readerJoinBtn" class="btn btn-primary">Join Game</button>
+                    <div id="readerJoinStatus" class="status-message"></div>
                 </div>
 
                 <div class="card">

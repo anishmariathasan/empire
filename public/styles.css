@@ -566,3 +566,52 @@ footer {
         font-size: 1.8rem;
     }
 }
+
+/* Back navigation */
+.back-nav {
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--primary-color);
+    background: var(--surface-light);
+}
+
+/* Name confirmation dialog */
+.name-preview {
+    background: var(--surface-light);
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    padding: 16px;
+    margin: 16px 0;
+    text-align: center;
+}
+
+.name-preview .label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.name-preview .preview-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--warning-color);
+}

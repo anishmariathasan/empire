@@ -38,6 +38,16 @@ function shuffleArray(array) {
     return shuffled;
 }
 
+// Normalize name to Title Case
+function normalizeName(name) {
+    return name
+        .trim()
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
 // API Routes
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -98,9 +108,12 @@ io.on('connection', (socket) => {
             return;
         }
 
+        // Normalize player name
+        const normalizedPlayerName = normalizeName(playerName);
+
         // Check for duplicate names
         for (const [id, player] of game.players) {
-            if (player.name.toLowerCase() === playerName.toLowerCase()) {
+            if (player.name.toLowerCase() === normalizedPlayerName.toLowerCase()) {
                 callback({ success: false, error: 'That name is already taken. Please choose a different name.' });
                 return;
             }
@@ -108,7 +121,7 @@ io.on('connection', (socket) => {
 
         game.players.set(socket.id, {
             id: socket.id,
-            name: playerName,
+            name: normalizedPlayerName,
             hasSubmitted: false
         });
 
@@ -123,8 +136,8 @@ io.on('connection', (socket) => {
 
         io.to(pin.toUpperCase()).emit('playerListUpdate', playerList);
 
-        console.log(`${playerName} joined game ${pin}`);
-        callback({ success: true, isHost: socket.id === game.hostId });
+        console.log(`${normalizedPlayerName} joined game ${pin}`);
+        callback({ success: true, isHost: socket.id === game.hostId, normalizedName: normalizedPlayerName });
     });
 
     // Submit a famous person name
@@ -148,7 +161,10 @@ io.on('connection', (socket) => {
             return;
         }
 
-        game.submissions.set(socket.id, famousName);
+        // Normalize famous name to Title Case
+        const normalizedFamousName = normalizeName(famousName);
+
+        game.submissions.set(socket.id, normalizedFamousName);
         player.hasSubmitted = true;
 
         // Update player list
@@ -160,7 +176,7 @@ io.on('connection', (socket) => {
         io.to(pin).emit('playerListUpdate', playerList);
 
         console.log(`${player.name} submitted their name in game ${pin}`);
-        callback({ success: true });
+        callback({ success: true, normalizedName: normalizedFamousName });
     });
 
     // Reader joins the game

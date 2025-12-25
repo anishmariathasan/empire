@@ -60,6 +60,13 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
+// Title case helper for preview
+function toTitleCase(str) {
+    return str.trim().toLowerCase().split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
 function updatePlayerList(players) {
     playerList.innerHTML = '';
     playerCountSpan.textContent = players.length;
@@ -97,12 +104,12 @@ joinBtn.addEventListener('click', () => {
     }
 
     joinError.textContent = '';
-    playerName = name;
-
+    
     socket.emit('joinGame', { pin: gamePin, playerName: name }, (response) => {
         if (response.success) {
+            playerName = response.normalizedName || name;
             showScreen('waitingRoom');
-            showToast(`Welcome, ${name}!`, 'success');
+            showToast(`Welcome, ${playerName}!`, 'success');
         } else {
             joinError.textContent = response.error || 'Failed to join game';
         }
@@ -123,11 +130,19 @@ submitNameBtn.addEventListener('click', () => {
         return;
     }
 
+    // Show preview of normalized name
+    const normalizedPreview = toTitleCase(famousName);
+    if (!confirm(`Submit this name?\\n\\n"${normalizedPreview}"\\n\\nMake sure the spelling is correct!`)) {
+        return;
+    }
+
     socket.emit('submitName', { famousName }, (response) => {
         if (response.success) {
             hasSubmitted = true;
             submissionCard.style.display = 'none';
             submittedCard.style.display = 'block';
+            // Update submitted card to show the normalized name
+            submittedCard.querySelector('p').textContent = `Submitted: "${response.normalizedName}"`;
             showToast('Name submitted successfully!', 'success');
         } else {
             showToast(response.error || 'Failed to submit name', 'error');
