@@ -615,3 +615,30 @@ footer {
     font-weight: 600;
     color: var(--warning-color);
 }
+
+/* Submitted confirmation */
+.submitted-confirmation {
+    font-size: 1.1rem;
+}
+
+.submitted-name {
+    margin: 8px 0;
+}
+
+.waiting-info {
+    margin: 20px 0;
+    padding: 16px;
+    background: var(--surface-light);
+    border-radius: 10px;
+}
+
+.another-player-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.another-player-section p {
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+}

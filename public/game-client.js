@@ -176,7 +176,7 @@ submitNameBtn.addEventListener('click', () => {
             hasSubmitted = true;
             famousNameInput.disabled = true;
             submitNameBtn.disabled = true;
-            submissionStatus.textContent = `✓ Submitted: "${response.normalizedName}"`;
+            submissionStatus.innerHTML = `<div class="submitted-confirmation">✓ Submitted: <strong>"${response.normalizedName}"</strong></div>`;
             submissionStatus.className = 'status-message success';
             showToast('Name submitted successfully!', 'success');
         } else {

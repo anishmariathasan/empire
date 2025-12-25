@@ -135,8 +135,23 @@ submitNameBtn.addEventListener('click', () => {
             hasSubmitted = true;
             submissionCard.style.display = 'none';
             submittedCard.style.display = 'block';
-            // Update submitted card to show the normalized name
-            submittedCard.querySelector('p').textContent = `Submitted: "${response.normalizedName}"`;
+            // Update submitted card to show the normalized name and add another player option
+            submittedCard.innerHTML = `
+                <div class="success-icon">✓</div>
+                <h2>Name Submitted!</h2>
+                <p class="submitted-name">Playing as: <strong>${playerName}</strong></p>
+                <p class="submitted-name">Submitted: <strong>"${response.normalizedName}"</strong></p>
+                <div class="waiting-info">
+                    <div class="spinner"></div>
+                    <p>Waiting for other players...</p>
+                </div>
+                <div class="another-player-section">
+                    <p>Got another player on this device?</p>
+                    <button id="addAnotherPlayerBtn" class="btn btn-secondary">Add Another Player</button>
+                </div>
+            `;
+            // Add event listener for the new button
+            document.getElementById('addAnotherPlayerBtn').addEventListener('click', resetForAnotherPlayer);
             showToast('Name submitted successfully!', 'success');
         } else {
             showToast(response.error || 'Failed to submit name', 'error');
@@ -144,28 +159,32 @@ submitNameBtn.addEventListener('click', () => {
     });
 });
 
+// Reset for another player on same device
+function resetForAnotherPlayer() {
+    // Disconnect current socket and reconnect
+    socket.disconnect();
+    socket.connect();
+    
+    // Reset state
+    playerName = null;
+    hasSubmitted = false;
+    
+    // Reset UI
+    playerNameInput.value = '';
+    famousNameInput.value = '';
+    submissionCard.style.display = 'block';
+    submittedCard.style.display = 'none';
+    
+    // Go back to join screen
+    showScreen('join');
+    showToast('Ready for another player!', 'info');
+}
+
 famousNameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         submitNameBtn.click();
     }
 });
-
-// Add another player button
-const addAnotherPlayerBtn = document.getElementById('addAnotherPlayerBtn');
-if (addAnotherPlayerBtn) {
-    addAnotherPlayerBtn.addEventListener('click', () => {
-        // Reset form for next player
-        playerName = null;
-        hasSubmitted = false;
-        famousNameInput.value = '';
-        famousNameInput.disabled = false;
-        submitNameBtn.disabled = false;
-        playerNameInput.value = '';
-        
-        // Go back to join screen
-        showScreen('join');
-    });
-}
 
 playAgainBtn.addEventListener('click', () => {
     // Reset state

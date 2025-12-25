@@ -195,8 +195,8 @@ socket.emit('joinAsReader', { pin: gamePin }, (response) => {
     }
 });
 
-// Reader join as player - named function so it can be re-attached
-function handleReaderJoin() {
+// Reader join as player
+readerJoinBtn.addEventListener('click', () => {
     const name = readerNameInput.value.trim();
     const famousName = readerFamousNameInput.value.trim();
 
@@ -222,33 +222,8 @@ function handleReaderJoin() {
                         <h2>You're In!</h2>
                         <p>Playing as: <strong>${response.normalizedName}</strong></p>
                         <p>Submitted: <strong>${submitResponse.normalizedName}</strong></p>
-                        <button id="readerAddAnotherPlayerBtn" class="btn btn-secondary" style="margin-top: 16px;">+ Add Another Player</button>
                     `;
                     showToast('You have joined the game!', 'success');
-                    
-                    // Attach event listener to new button
-                    document.getElementById('readerAddAnotherPlayerBtn').addEventListener('click', () => {
-                        // Reset form
-                        readerNameInput.value = '';
-                        readerFamousNameInput.value = '';
-                        readerJoinCard.innerHTML = `
-                            <h2>Join as a Player (Optional)</h2>
-                            <p>Want to play too? Enter your name to participate:</p>
-                            <div class="form-group">
-                                <label for="readerName">Your Name</label>
-                                <input type="text" id="readerName" placeholder="Enter your name" maxlength="20" autocomplete="off">
-                            </div>
-                            <div class="form-group">
-                                <label for="readerFamousName">Famous Person's Name</label>
-                                <input type="text" id="readerFamousName" placeholder="e.g., Albert Einstein" maxlength="50" autocomplete="off">
-                            </div>
-                            <button id="readerJoinBtn2" class="btn btn-primary">Join Game</button>
-                            <div id="readerJoinStatus" class="status-message"></div>
-                        `;\n                        // Re-attach listeners
-                        readerNameInput = document.getElementById('readerName');
-                        readerFamousNameInput = document.getElementById('readerFamousName');
-                        document.getElementById('readerJoinBtn2').addEventListener('click', handleReaderJoin);
-                    });
                 } else {
                     showToast(submitResponse.error || 'Failed to submit name', 'error');
                 }
@@ -257,9 +232,7 @@ function handleReaderJoin() {
             showToast(response.error || 'Failed to join game', 'error');
         }
     });
-}
-
-readerJoinBtn.addEventListener('click', handleReaderJoin);
+});
 
 // Event Handlers
 startGameBtn.addEventListener('click', () => {
