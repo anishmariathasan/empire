@@ -56,6 +56,11 @@ let readerHasJoined = false;
 // Initialize
 readerPin.textContent = gamePin;
 
+// Keep-alive to prevent server sleep (Render free tier)
+setInterval(() => {
+    fetch('/health').catch(() => {});
+}, 60000); // Ping every minute
+
 // Utility functions
 function showScreen(screenName) {
     Object.values(screens).forEach(screen => screen.classList.remove('active'));

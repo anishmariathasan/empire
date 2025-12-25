@@ -95,6 +95,22 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Keep-alive to prevent server sleep (Render free tier)
+let keepAliveInterval = null;
+function startKeepAlive() {
+    if (keepAliveInterval) return;
+    keepAliveInterval = setInterval(() => {
+        fetch('/health').catch(() => {});
+    }, 60000); // Ping every minute
+}
+
+function stopKeepAlive() {
+    if (keepAliveInterval) {
+        clearInterval(keepAliveInterval);
+        keepAliveInterval = null;
+    }
+}
+
 // Event Handlers
 createGameBtn.addEventListener('click', () => {
     socket.emit('createGame', (response) => {
@@ -107,6 +123,7 @@ createGameBtn.addEventListener('click', () => {
             
             showScreen('gameCreated');
             showToast('Game created successfully!', 'success');
+            startKeepAlive(); // Keep server alive while game is active
         } else {
             showToast(response.error || 'Failed to create game', 'error');
         }

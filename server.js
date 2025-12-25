@@ -9,7 +9,9 @@ const io = new Server(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
-    }
+    },
+    pingInterval: 10000, // Keep connections alive
+    pingTimeout: 5000
 });
 
 // Serve static files
@@ -17,6 +19,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Store active games
 const games = new Map();
+
+// Health check endpoint (keeps Render from sleeping if pinged)
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', games: games.size });
+});
 
 // Generate a random 6-character game PIN
 function generateGamePin() {
