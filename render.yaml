@@ -1,8 +1,9 @@
 services:
   - type: web
     name: empire-game
-    env: node
+    runtime: node
     plan: free
+    rootDir: ./
     buildCommand: npm install
     startCommand: node server.js
     envVars:
