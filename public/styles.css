@@ -593,7 +593,7 @@ footer {
     background: var(--surface-light);
 }
 
-/* Name confirmation dialog */
+/* Name confirmation dialogue */
 .name-preview {
     background: var(--surface-light);
     border: 2px solid var(--primary-color);
