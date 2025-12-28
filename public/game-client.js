@@ -45,9 +45,12 @@ const newGameBtn = document.getElementById('newGameBtn');
 // State
 let currentPin = null;
 let hasSubmitted = false;
+let isHost = false;
+let currentScreen = 'home';
 
 // Utility functions
 function showScreen(screenName) {
+    currentScreen = screenName;
     Object.values(screens).forEach(screen => screen.classList.remove('active'));
     screens[screenName].classList.add('active');
 }
@@ -121,6 +124,7 @@ createGameBtn.addEventListener('click', () => {
             const gameUrl = `${window.location.origin}/game/${response.pin}`;
             shareLink.value = gameUrl;
             
+            isHost = true;
             showScreen('gameCreated');
             showToast('Game created successfully!', 'success');
             startKeepAlive(); // Keep server alive while game is active
@@ -277,11 +281,27 @@ socket.on('gameReset', ({ playerList: players }) => {
 });
 
 socket.on('disconnect', () => {
-    showToast('Disconnected from server', 'error');
+    // Only show disconnect error if we're in an active game state
+    // Don't alarm users on the game created screen - the game still exists
+    if (currentScreen !== 'home' && currentScreen !== 'gameCreated') {
+        showToast('Disconnected from server', 'error');
+    }
 });
 
 socket.on('connect', () => {
-    if (currentPin) {
+    // If we have a PIN and were the host, rejoin as reader to maintain connection
+    if (currentPin && isHost) {
+        socket.emit('joinAsReader', { pin: currentPin }, (response) => {
+            if (response.success) {
+                console.log('Reconnected as host/reader');
+                if (currentScreen === 'gameCreated') {
+                    showToast('Connected', 'success');
+                } else {
+                    showToast('Reconnected to server', 'success');
+                }
+            }
+        });
+    } else if (currentPin) {
         showToast('Reconnected to server', 'success');
     }
 });

@@ -147,6 +147,7 @@ io.on('connection', (socket) => {
 
         // Notify all players about the updated player list
         const playerList = Array.from(game.players.values()).map(p => ({
+            id: p.id,
             name: p.name,
             hasSubmitted: p.hasSubmitted
         }));
@@ -194,6 +195,7 @@ io.on('connection', (socket) => {
 
         // Update player list
         const playerList = Array.from(game.players.values()).map(p => ({
+            id: p.id,
             name: p.name,
             hasSubmitted: p.hasSubmitted
         }));
@@ -421,6 +423,7 @@ io.on('connection', (socket) => {
         }
 
         const playerList = Array.from(game.players.values()).map(p => ({
+            id: p.id,
             name: p.name,
             hasSubmitted: p.hasSubmitted
         }));
@@ -454,6 +457,7 @@ io.on('connection', (socket) => {
             
             if (playersToRemove.length > 0) {
                 const playerList = Array.from(game.players.values()).map(p => ({
+                    id: p.id,
                     name: p.name,
                     hasSubmitted: p.hasSubmitted
                 }));
